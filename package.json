@@ -1,8 +1,9 @@
 {
-  "name": "react-example",
+  "name": "santo-rosario",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "homepage": "https://borges2023.github.io/santo-rosario/",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",

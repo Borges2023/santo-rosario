@@ -1,0 +1,6 @@
+{
+  "name": "Santo Terço Luminoso",
+  "description": "Aplicativo de Santo Terço com contas luminosas interativas, avanço automático e manual, orações completas e acompanhamento dos mistérios diários.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

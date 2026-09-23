@@ -1,5 +1,5 @@
 // Simple service worker for offline support and PWA installability
-const CACHE_NAME = 'santo-terco-v1';
+const CACHE_NAME = 'santo-terco-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,7 +24,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key.startsWith('santo-terco-') && key !== CACHE_NAME) {
             return caches.delete(key);
           }
         })
@@ -38,16 +38,34 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        // Fallback to cached index.html for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      if (event.request.mode === 'navigate') {
+        try {
+          const response = await fetch(event.request, { cache: 'no-cache' });
+          if (response.ok) {
+            await cache.put('./index.html', response.clone());
+          }
+          return response;
+        } catch {
+          return (await caches.match('./index.html')) || Response.error();
         }
-      });
+      }
+
+      const cachedResponse = await caches.match(event.request);
+      if (cachedResponse) return cachedResponse;
+
+      const response = await fetch(event.request);
+      if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+        await cache.put(event.request, response.clone());
+      }
+      return response;
+    })().catch(async () => {
+      if (event.request.mode === 'navigate') {
+        return (await caches.match('./index.html')) || Response.error();
+      }
+      return Response.error();
     })
   );
 });

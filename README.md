@@ -92,3 +92,19 @@ public/
 ## 📜 Licença
 
 Este projeto é destinado ao uso pessoal e devocional. Ajustes e melhorias são bem-vindos.
+
+## Uso sem internet no celular
+
+O app não precisa de banco de dados nem de uma conta. Orações e mistérios fazem parte do aplicativo; preferências, intenção e etapa atual ficam salvas localmente no aparelho.
+
+- **Como PWA:** abra o site com internet, instale pelo menu do navegador e aguarde o primeiro carregamento terminar. Depois disso, o app instalado abre e funciona sem conexão.
+- **Como app Android:** gere/instale o APK com os arquivos incluídos no pacote. A instalação nativa do Capacitor usa o conteúdo local do aplicativo e pode funcionar offline desde a primeira abertura.
+
+A leitura em voz alta depende das vozes instaladas no próprio celular. Fontes externas foram removidas para que a interface não precise da internet.
+
+Para atualizar os arquivos nativos Android depois de um build web:
+
+```bash
+npm run build
+npx cap sync android
+```

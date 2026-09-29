@@ -30,19 +30,23 @@ export default function App() {
   // PWA Install detection
   const { isInstallable, install } = usePWAInstall();
 
-  // 1. Core Rosary state
-  const [currentMystery, setCurrentMystery] = useState<MysteryType>(() => getDefaultMysteryForDate());
-  const [steps, setSteps] = useState<RosaryStep[]>(() => buildRosarySequence(getDefaultMysteryForDate()));
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
+  // Preferências e progresso são guardados neste dispositivo.
+  const saved = (() => { try { return JSON.parse(localStorage.getItem('santo-terco-state') || 'null'); } catch { return null; } })();
+  const initialMystery: MysteryType = saved?.currentMystery in MYSTERY_GROUPS ? saved.currentMystery : getDefaultMysteryForDate();
+  const [currentMystery, setCurrentMystery] = useState<MysteryType>(initialMystery);
+  const [steps, setSteps] = useState<RosaryStep[]>(() => buildRosarySequence(initialMystery));
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(() => Number.isInteger(saved?.currentStepIndex) ? Math.max(0, Math.min(saved.currentStepIndex, buildRosarySequence(initialMystery).length - 1)) : 0);
+  const [prayerIntention, setPrayerIntention] = useState<string>(saved?.prayerIntention ?? 'Pelas nossas famílias, saúde e paz no mundo');
+  const [autoSeconds, setAutoSeconds] = useState<number>(saved?.autoSeconds ?? 15);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(saved?.soundEnabled ?? true);
+  const [hapticEnabled, setHapticEnabled] = useState<boolean>(saved?.hapticEnabled ?? true);
+  const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>(saved?.fontSize ?? 'md');
+  const [compactView, setCompactView] = useState<boolean>(saved?.compactView ?? false);
 
-  // 2. Preferences and Settings
-  const [prayerIntention, setPrayerIntention] = useState<string>('Pelas nossas famílias, saúde e paz no mundo');
-  const [autoSeconds, setAutoSeconds] = useState<number>(15);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const [hapticEnabled, setHapticEnabled] = useState<boolean>(true);
-  const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md');
-  const [compactView, setCompactView] = useState<boolean>(false);
-
+  useEffect(() => {
+    try { localStorage.setItem('santo-terco-state', JSON.stringify({ currentMystery, currentStepIndex, prayerIntention, autoSeconds, soundEnabled, hapticEnabled, fontSize, compactView })); }
+    catch { /* O app continua utilizável se o armazenamento estiver indisponível. */ }
+  }, [currentMystery, currentStepIndex, prayerIntention, autoSeconds, soundEnabled, hapticEnabled, fontSize, compactView]);
   // 3. Auto-advance state
   const [isAutoPlay, setIsAutoPlay] = useState<boolean>(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number>(15);
